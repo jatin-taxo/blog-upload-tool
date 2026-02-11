@@ -4,6 +4,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import matter from "gray-matter";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Status =
   | { type: "idle" }
@@ -90,7 +103,7 @@ export default function Home() {
       const file = e.dataTransfer.files[0];
       if (file) processFile(file);
     },
-    [processFile]
+    [processFile],
   );
 
   const handleFileChange = useCallback(
@@ -98,7 +111,7 @@ export default function Home() {
       const file = e.target.files?.[0];
       if (file) processFile(file);
     },
-    [processFile]
+    [processFile],
   );
 
   const handleClear = () => {
@@ -153,7 +166,7 @@ export default function Home() {
   if (authenticated === null) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-zinc-800" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -161,34 +174,42 @@ export default function Home() {
   // Auth gate
   if (!authenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-sm space-y-4 rounded-xl border border-zinc-200 bg-white p-8 shadow-sm"
-        >
-          <h1 className="text-xl font-semibold text-zinc-900">
-            Blog Uploader
-          </h1>
-          <p className="text-sm text-zinc-500">
-            Enter the password to continue.
-          </p>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            autoFocus
-          />
-          {authError && <p className="text-sm text-red-600">{authError}</p>}
-          <button
-            type="submit"
-            disabled={authLoading || !password}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50"
-          >
-            {authLoading ? "Checking..." : "Log In"}
-          </button>
-        </form>
+      <div className="font-mono flex min-h-screen items-center justify-center px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">Blog Uploader</CardTitle>
+            <CardDescription>
+              Enter the password to continue.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  autoFocus
+                />
+              </div>
+              {authError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                disabled={authLoading || !password}
+                className="w-full"
+              >
+                {authLoading ? "Checking..." : "Log In"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -199,7 +220,7 @@ export default function Home() {
       <h1 className="mb-1 text-2xl font-semibold text-zinc-900">
         Blog Uploader
       </h1>
-      <p className="mb-8 text-sm text-zinc-500">
+      <p className="mb-8 text-sm text-muted-foreground">
         Upload a markdown file to publish a new blog post.
       </p>
 
@@ -252,134 +273,149 @@ export default function Home() {
       {fileContent && (
         <div className="space-y-6">
           {/* File header */}
-          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
-            <span className="text-sm font-medium text-zinc-700">
+          <Card className="flex-row items-center justify-between py-3 px-4">
+            <span className="text-sm font-medium">
               {fileName}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleClear}
-              className="text-sm text-zinc-500 hover:text-zinc-800"
             >
               Clear
-            </button>
-          </div>
+            </Button>
+          </Card>
 
           {/* Validation warnings */}
           {missingFields.length > 0 && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-sm font-medium text-amber-800">
-                Missing required fields:{" "}
-                {missingFields.join(", ")}
-              </p>
-              <p className="mt-1 text-xs text-amber-600">
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+              <AlertTitle>
+                Missing required fields: {missingFields.join(", ")}
+              </AlertTitle>
+              <AlertDescription className="text-amber-600">
                 Add these to the frontmatter at the top of your markdown file.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Frontmatter display */}
           {frontmatter && Object.keys(frontmatter).length > 0 && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <h2 className="mb-3 text-sm font-semibold text-zinc-500 uppercase tracking-wide">
-                Post Details
-              </h2>
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-                {Object.entries(frontmatter).map(([key, value]) => (
-                  <div key={key} className="contents">
-                    <dt className="font-medium text-zinc-500 capitalize">
-                      {key}
-                    </dt>
-                    <dd className="text-zinc-900">{String(value)}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm text-muted-foreground uppercase tracking-wide">
+                  Post Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+                  {Object.entries(frontmatter).map(([key, value]) => (
+                    <div key={key} className="contents">
+                      <dt className="font-medium text-muted-foreground capitalize">
+                        {key}
+                      </dt>
+                      <dd>{String(value)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </CardContent>
+            </Card>
           )}
 
           {/* Markdown preview */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-6">
-            <h2 className="mb-4 text-sm font-semibold text-zinc-500 uppercase tracking-wide">
-              Preview
-            </h2>
-            <div className="prose prose-zinc max-w-none prose-headings:font-semibold prose-a:text-blue-600">
-              <Markdown remarkPlugins={[remarkGfm]}>{body}</Markdown>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm text-muted-foreground uppercase tracking-wide">
+                Preview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-zinc max-w-none prose-headings:font-semibold prose-a:text-blue-600">
+                <Markdown remarkPlugins={[remarkGfm]}>{body}</Markdown>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Status messages */}
           {status.type === "publishing" && (
-            <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-800" />
-              <span className="text-sm text-zinc-700">Publishing...</span>
-            </div>
+            <Alert>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>Publishing...</AlertDescription>
+            </Alert>
           )}
 
           {status.type === "success" && (
-            <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-4">
-              <p className="text-sm font-medium text-green-800">
+            <Alert className="border-green-200 bg-green-50 text-green-800">
+              <AlertTitle>
                 {status.isUpdate ? "Post updated" : "Post published"}{" "}
                 successfully!
-              </p>
-              <p className="mt-1 text-sm text-green-700">
-                It will be live at{" "}
-                <span className="font-medium">
-                  taxocity.com/blog/{status.slug}
-                </span>
-              </p>
-              <p className="mt-1 text-xs text-green-600">
-                The site may take a minute to rebuild.
-              </p>
-            </div>
+              </AlertTitle>
+              <AlertDescription className="text-green-700">
+                <p>
+                  It will be live at{" "}
+                  <span className="font-medium">
+                    taxocity.com/blog/{status.slug}
+                  </span>
+                </p>
+                <p className="text-xs text-green-600">
+                  The site may take a minute to rebuild.
+                </p>
+              </AlertDescription>
+            </Alert>
           )}
 
           {status.type === "error" && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-sm text-red-800">{status.message}</p>
-              <button
-                type="button"
-                onClick={() => handlePublish()}
-                className="mt-2 text-sm font-medium text-red-700 hover:text-red-900"
-              >
-                Try Again
-              </button>
-            </div>
+            <Alert variant="destructive">
+              <AlertTitle>{status.message}</AlertTitle>
+              <AlertDescription>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => handlePublish()}
+                  className="h-auto p-0 text-destructive hover:text-destructive/80"
+                >
+                  Try Again
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
 
           {status.type === "conflict" && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-sm text-amber-800">
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+              <AlertTitle>
                 A post with this slug already exists.
-              </p>
-              <div className="mt-3 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => handlePublish(true)}
-                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700"
-                >
-                  Overwrite
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatus({ type: "idle" })}
-                  className="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+              </AlertTitle>
+              <AlertDescription>
+                <div className="mt-2 flex gap-3">
+                  <Button
+                    size="sm"
+                    onClick={() => handlePublish(true)}
+                    className="bg-amber-600 text-white hover:bg-amber-700"
+                  >
+                    Overwrite
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setStatus({ type: "idle" })}
+                    className="border-amber-300 text-amber-800 hover:bg-amber-100"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Publish button */}
           {status.type !== "publishing" && status.type !== "success" && (
-            <button
-              type="button"
+            <Button
+              className="w-full"
+              size="lg"
               onClick={() => handlePublish()}
               disabled={!canPublish}
-              className="w-full rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Publish
-            </button>
+            </Button>
           )}
         </div>
       )}
