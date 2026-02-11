@@ -10,9 +10,13 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "gray-matter": "^4.0.3",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
