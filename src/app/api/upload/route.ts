@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import matter from "gray-matter";
 import { checkFileExists, commitFile } from "@/lib/github";
@@ -6,13 +5,6 @@ import { checkFileExists, commitFile } from "@/lib/github";
 const REQUIRED_FIELDS = ["slug", "title", "description", "author", "date", "coverImage", "tags"];
 
 export async function POST(request: Request) {
-  // Check auth
-  const cookieStore = await cookies();
-  const auth = cookieStore.get("blog-auth");
-  if (auth?.value !== "authenticated") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const { content, overwrite } = await request.json();
 
   if (!content || typeof content !== "string") {

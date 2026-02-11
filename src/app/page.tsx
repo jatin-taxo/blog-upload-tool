@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import matter from "gray-matter";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -38,11 +35,6 @@ const REQUIRED_FIELDS = [
 ];
 
 export default function Home() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
-  const [password, setPassword] = useState("");
-  const [authError, setAuthError] = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
-
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [frontmatter, setFrontmatter] = useState<Frontmatter | null>(null);
@@ -53,33 +45,6 @@ export default function Home() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const publishingRef = useRef(false);
-
-  // Check auth on mount
-  useEffect(() => {
-    fetch("/api/auth/check")
-      .then((r) => r.json())
-      .then((data) => setAuthenticated(data.authenticated))
-      .catch(() => setAuthenticated(false));
-  }, []);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError("");
-
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-
-    if (res.ok) {
-      setAuthenticated(true);
-    } else {
-      setAuthError("Wrong password. Please try again.");
-    }
-    setAuthLoading(false);
-  };
 
   const processFile = useCallback((file: File) => {
     if (!file.name.endsWith(".md")) return;
@@ -174,57 +139,6 @@ export default function Home() {
 
   const canPublish = missingFields.length === 0 && fileContent !== null;
 
-  // Loading state
-  if (authenticated === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  // Auth gate
-  if (!authenticated) {
-    return (
-      <div className="font-mono flex min-h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="text-xl">Blog Uploader</CardTitle>
-            <CardDescription>Enter the password to continue.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  autoFocus
-                />
-              </div>
-              {authError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{authError}</AlertDescription>
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                disabled={authLoading || !password}
-                className="w-full"
-              >
-                {authLoading ? "Checking..." : "Log In"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Main upload interface
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 py-12">
       <h1 className="mb-1 text-2xl font-semibold text-zinc-900">
