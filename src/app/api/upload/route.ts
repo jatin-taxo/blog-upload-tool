@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import matter from "gray-matter";
 import { checkFileExists, commitFile } from "@/lib/github";
 
-const REQUIRED_FIELDS = ["title", "date", "description", "slug"];
+const REQUIRED_FIELDS = ["slug", "title", "description", "author", "date", "coverImage", "tags"];
 
 export async function POST(request: Request) {
   // Check auth

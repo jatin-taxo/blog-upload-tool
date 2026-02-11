@@ -27,7 +27,15 @@ type Status =
 
 type Frontmatter = Record<string, unknown>;
 
-const REQUIRED_FIELDS = ["title", "date", "description", "slug"];
+const REQUIRED_FIELDS = [
+  "slug",
+  "title",
+  "description",
+  "author",
+  "date",
+  "coverImage",
+  "tags",
+];
 
 export default function Home() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -44,6 +52,7 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const publishingRef = useRef(false);
 
   // Check auth on mount
   useEffect(() => {
@@ -125,7 +134,8 @@ export default function Home() {
   };
 
   const handlePublish = async (overwrite = false) => {
-    if (!fileContent) return;
+    if (!fileContent || publishingRef.current) return;
+    publishingRef.current = true;
     setStatus({ type: "publishing" });
 
     try {
@@ -157,6 +167,8 @@ export default function Home() {
         type: "error",
         message: "Network error. Please check your connection and try again.",
       });
+    } finally {
+      publishingRef.current = false;
     }
   };
 
@@ -178,9 +190,7 @@ export default function Home() {
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-xl">Blog Uploader</CardTitle>
-            <CardDescription>
-              Enter the password to continue.
-            </CardDescription>
+            <CardDescription>Enter the password to continue.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -274,14 +284,8 @@ export default function Home() {
         <div className="space-y-6">
           {/* File header */}
           <Card className="flex-row items-center justify-between py-3 px-4">
-            <span className="text-sm font-medium">
-              {fileName}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-            >
+            <span className="text-sm font-medium">{fileName}</span>
+            <Button variant="ghost" size="sm" onClick={handleClear}>
               Clear
             </Button>
           </Card>
@@ -352,9 +356,14 @@ export default function Home() {
               <AlertDescription className="text-green-700">
                 <p>
                   It will be live at{" "}
-                  <span className="font-medium">
+                  <a
+                    href={`https://www.taxocity.com/blog/${status.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium underline hover:text-green-900"
+                  >
                     taxocity.com/blog/{status.slug}
-                  </span>
+                  </a>
                 </p>
                 <p className="text-xs text-green-600">
                   The site may take a minute to rebuild.
@@ -381,9 +390,7 @@ export default function Home() {
 
           {status.type === "conflict" && (
             <Alert className="border-amber-200 bg-amber-50 text-amber-800">
-              <AlertTitle>
-                A post with this slug already exists.
-              </AlertTitle>
+              <AlertTitle>A post with this slug already exists.</AlertTitle>
               <AlertDescription>
                 <div className="mt-2 flex gap-3">
                   <Button
