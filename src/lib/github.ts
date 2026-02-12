@@ -4,6 +4,7 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 const owner = process.env.GITHUB_REPO_OWNER!;
 const repo = process.env.GITHUB_REPO_NAME!;
+const branch = process.env.GITHUB_BRANCH!;
 
 export async function checkFileExists(
   slug: string,
@@ -13,7 +14,7 @@ export async function checkFileExists(
       owner,
       repo,
       path: `content/blogs/${slug}.md`,
-      ref: "master",
+      ref: branch,
     });
 
     if (!Array.isArray(data) && data.type === "file") {
@@ -45,7 +46,7 @@ export async function commitFile(
     path,
     message,
     content: Buffer.from(content).toString("base64"),
-    branch: "master",
+    branch: branch,
     ...(sha ? { sha } : {}),
   });
 }
