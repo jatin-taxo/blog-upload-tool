@@ -252,7 +252,7 @@ export default function Home() {
                     className="absolute top-2.5 right-2.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                     onClick={() =>
                       handleCopy(
-                        "GITHUB_TOKEN=ghp_your_token_here\nGITHUB_REPO_OWNER=your-username\nGITHUB_REPO_NAME=your-repo"
+                        "GITHUB_TOKEN=ghp_your_token_here\nGITHUB_REPO_OWNER=your-username\nGITHUB_REPO_NAME=your-repo\nGITHUB_BRANCH=master"
                       )
                     }
                   >
@@ -261,7 +261,8 @@ export default function Home() {
                   <pre className="font-mono text-xs leading-relaxed text-zinc-300">
 {`GITHUB_TOKEN=ghp_your_token_here
 GITHUB_REPO_OWNER=your-username
-GITHUB_REPO_NAME=your-repo`}
+GITHUB_REPO_NAME=your-repo
+GITHUB_BRANCH=master`}
                   </pre>
                 </div>
               </div>
