@@ -7,12 +7,7 @@ import remarkGfm from "remark-gfm";
 import { CircleHelp, Copy, Check, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
@@ -23,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 type Status =
   | { type: "idle" }
@@ -54,6 +50,8 @@ export default function Home() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const publishingRef = useRef(false);
+
+  const router = useRouter();
 
   const processFile = useCallback((file: File) => {
     if (!file.name.endsWith(".md")) return;
@@ -146,6 +144,11 @@ export default function Home() {
     }
   };
 
+  async function handleSignOut() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  }
+
   const canPublish = missingFields.length === 0 && fileContent !== null;
 
   const [copied, setCopied] = useState(false);
@@ -168,117 +171,166 @@ export default function Home() {
           </p>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
-              <CircleHelp className="size-4" />
-              Setup Guide
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>GitHub Token Setup</DialogTitle>
-              <DialogDescription>
-                A personal access token lets this tool commit blog posts to your
-                GitHub repository.
-              </DialogDescription>
-            </DialogHeader>
+        <div className="flex items-center gap-1">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground"
+              >
+                <CircleHelp className="size-4" />
+                Setup Guide
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>GitHub Token Setup</DialogTitle>
+                <DialogDescription>
+                  A personal access token lets this tool commit blog posts to
+                  your GitHub repository.
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="space-y-5 text-sm">
-              {/* Step 1 */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-zinc-900">1. Open GitHub token settings</h3>
-                <p className="text-muted-foreground">
-                  Go to{" "}
-                  <a
-                    href="https://github.com/settings/tokens?type=beta"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-                  >
-                    github.com/settings/tokens
-                  </a>{" "}
-                  and click <strong>Generate new token</strong> (fine-grained).
-                </p>
-              </div>
+              <div className="space-y-5 text-sm">
+                {/* Step 1 */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-zinc-900">
+                    1. Open GitHub token settings
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Go to{" "}
+                    <a
+                      href="https://github.com/settings/tokens?type=beta"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
+                    >
+                      github.com/settings/tokens
+                    </a>{" "}
+                    and click <strong>Generate new token</strong>{" "}
+                    (fine-grained).
+                  </p>
+                </div>
 
-              {/* Step 2 */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-zinc-900">2. Configure the token</h3>
-                <ul className="space-y-1.5 text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
-                    <span><strong>Token name</strong> &mdash; something like <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">blog-uploader</code></span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
-                    <span><strong>Expiration</strong> &mdash; choose a duration or set no expiration</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
-                    <span><strong>Repository access</strong> &mdash; select <em>Only select repositories</em> and pick your blog repo</span>
-                  </li>
-                </ul>
-              </div>
+                {/* Step 2 */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-zinc-900">
+                    2. Configure the token
+                  </h3>
+                  <ul className="space-y-1.5 text-muted-foreground">
+                    <li className="flex gap-2">
+                      <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      <span>
+                        <strong>Token name</strong> &mdash; something like{" "}
+                        <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">
+                          blog-uploader
+                        </code>
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      <span>
+                        <strong>Expiration</strong> &mdash; choose a duration or
+                        set no expiration
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400" />
+                      <span>
+                        <strong>Repository access</strong> &mdash; select{" "}
+                        <em>Only select repositories</em> and pick your blog
+                        repo
+                      </span>
+                    </li>
+                  </ul>
+                </div>
 
-              {/* Step 3 */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-zinc-900">3. Set permissions</h3>
-                <p className="text-muted-foreground">
-                  Under <strong>Repository permissions</strong>, enable:
-                </p>
-                <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-zinc-700">Contents</span>
-                    <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-700">Read and write</span>
+                {/* Step 3 */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-zinc-900">
+                    3. Set permissions
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Under <strong>Repository permissions</strong>, enable:
+                  </p>
+                  <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs text-zinc-700">
+                        Contents
+                      </span>
+                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                        Read and write
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    No other permissions are needed. Click{" "}
+                    <strong>Generate token</strong> and copy it.
+                  </p>
+                </div>
+
+                {/* Step 4 */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-zinc-900">
+                    4. Add to environment variables
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Set the following variables in your{" "}
+                    <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">
+                      .env.local
+                    </code>{" "}
+                    file or in your hosting provider&apos;s settings:
+                  </p>
+                  <div className="relative rounded-md border border-zinc-200 bg-zinc-950 p-4">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="absolute top-2.5 right-2.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                      onClick={() =>
+                        handleCopy(
+                          "GITHUB_TOKEN=ghp_your_token_here\nGITHUB_REPO_OWNER=your-username\nGITHUB_REPO_NAME=your-repo\nGITHUB_BRANCH=master",
+                        )
+                      }
+                    >
+                      {copied ? (
+                        <Check className="size-3" />
+                      ) : (
+                        <Copy className="size-3" />
+                      )}
+                    </Button>
+                    <pre className="font-mono text-xs leading-relaxed text-zinc-300">
+                      {`GITHUB_TOKEN=ghp_your_token_here
+                        GITHUB_REPO_OWNER=your-username
+                        GITHUB_REPO_NAME=your-repo
+                        GITHUB_BRANCH=master`}
+                    </pre>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  No other permissions are needed. Click <strong>Generate token</strong> and copy it.
-                </p>
-              </div>
 
-              {/* Step 4 */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-zinc-900">4. Add to environment variables</h3>
-                <p className="text-muted-foreground">
-                  Set the following variables in your <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">.env.local</code> file
-                  or in your hosting provider&apos;s settings:
-                </p>
-                <div className="relative rounded-md border border-zinc-200 bg-zinc-950 p-4">
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className="absolute top-2.5 right-2.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                    onClick={() =>
-                      handleCopy(
-                        "GITHUB_TOKEN=ghp_your_token_here\nGITHUB_REPO_OWNER=your-username\nGITHUB_REPO_NAME=your-repo\nGITHUB_BRANCH=master"
-                      )
-                    }
-                  >
-                    {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                  </Button>
-                  <pre className="font-mono text-xs leading-relaxed text-zinc-300">
-{`GITHUB_TOKEN=ghp_your_token_here
-GITHUB_REPO_OWNER=your-username
-GITHUB_REPO_NAME=your-repo
-GITHUB_BRANCH=master`}
-                  </pre>
+                {/* Note */}
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+                  <p className="text-xs text-amber-800">
+                    <strong>Keep your token secret.</strong> Never commit it to
+                    version control. If compromised, revoke it immediately from
+                    GitHub settings.
+                  </p>
                 </div>
               </div>
 
-              {/* Note */}
-              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
-                <p className="text-xs text-amber-800">
-                  <strong>Keep your token secret.</strong> Never commit it to version control.
-                  If compromised, revoke it immediately from GitHub settings.
-                </p>
-              </div>
-            </div>
+              <DialogFooter showCloseButton />
+            </DialogContent>
+          </Dialog>
 
-            <DialogFooter showCloseButton />
-          </DialogContent>
-        </Dialog>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-500 hover:text-red-500 hover:bg-red-100"
+            onClick={handleSignOut}
+          >
+            Sign out
+          </Button>
+        </div>
       </div>
 
       {/* Drop zone */}
