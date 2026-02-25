@@ -5,7 +5,8 @@ import { checkFileExists, commitFile } from "@/lib/github";
 const REQUIRED_FIELDS = ["slug", "title", "description", "author", "date", "coverImage", "tags"];
 
 export async function POST(request: Request) {
-  const { content, overwrite } = await request.json();
+  const { content, overwrite, extension } = await request.json();
+  const fileExtension = extension === ".mdx" ? ".mdx" : ".md";
 
   if (!content || typeof content !== "string") {
     return NextResponse.json(
@@ -34,10 +35,10 @@ export async function POST(request: Request) {
   }
 
   const slug = String(parsed.data.slug);
-  const path = `content/blogs/${slug}.md`;
+  const path = `content/blogs/${slug}${fileExtension}`;
 
   // Check if file exists
-  const existing = await checkFileExists(slug);
+  const existing = await checkFileExists(slug, fileExtension);
 
   if (existing.exists && !overwrite) {
     return NextResponse.json(

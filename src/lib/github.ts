@@ -8,12 +8,13 @@ const branch = process.env.GITHUB_BRANCH!;
 
 export async function checkFileExists(
   slug: string,
+  extension: ".md" | ".mdx" = ".md",
 ): Promise<{ exists: boolean; sha?: string }> {
   try {
     const { data } = await octokit.repos.getContent({
       owner,
       repo,
-      path: `content/blogs/${slug}.md`,
+      path: `content/blogs/${slug}${extension}`,
       ref: branch,
     });
 

@@ -5,6 +5,7 @@ import matter from "gray-matter";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CircleHelp, Copy, Check, Loader2 } from "lucide-react";
+import { MdxPreview } from "@/components/mdx-preview";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,7 @@ export default function Home() {
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [status, setStatus] = useState<Status>({ type: "idle" });
   const [dragging, setDragging] = useState(false);
+  const [fileExtension, setFileExtension] = useState<".md" | ".mdx">(".md");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const publishingRef = useRef(false);
@@ -54,13 +56,15 @@ export default function Home() {
   const router = useRouter();
 
   const processFile = useCallback((file: File) => {
-    if (!file.name.endsWith(".md")) return;
+    if (!file.name.endsWith(".md") && !file.name.endsWith(".mdx")) return;
+    const ext = file.name.endsWith(".mdx") ? ".mdx" : ".md";
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
       setFileContent(text);
       setFileName(file.name);
+      setFileExtension(ext);
       setStatus({ type: "idle" });
 
       try {
@@ -101,6 +105,7 @@ export default function Home() {
     setFrontmatter(null);
     setBody("");
     setMissingFields([]);
+    setFileExtension(".md");
     setStatus({ type: "idle" });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -114,7 +119,7 @@ export default function Home() {
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: fileContent, overwrite }),
+        body: JSON.stringify({ content: fileContent, overwrite, extension: fileExtension }),
       });
 
       const data = await res.json();
@@ -363,15 +368,15 @@ export default function Home() {
             />
           </svg>
           <p className="text-sm font-medium text-zinc-700">
-            Drop your .md file here or click to browse
+            Drop your .md or .mdx file here or click to browse
           </p>
           <p className="mt-1 text-xs text-zinc-400">
-            Only markdown files accepted
+            Markdown and MDX files accepted
           </p>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".md"
+            accept=".md,.mdx"
             onChange={handleFileChange}
             className="hidden"
           />
@@ -433,7 +438,11 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-zinc max-w-none prose-headings:font-semibold prose-a:text-blue-600">
-                <Markdown remarkPlugins={[remarkGfm]}>{body}</Markdown>
+                {fileExtension === ".mdx" ? (
+                  <MdxPreview source={body} />
+                ) : (
+                  <Markdown remarkPlugins={[remarkGfm]}>{body}</Markdown>
+                )}
               </div>
             </CardContent>
           </Card>
