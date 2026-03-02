@@ -166,7 +166,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 py-12">
-      <div className="mb-8 flex items-start justify-between">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="mb-1 text-2xl font-semibold text-zinc-900">
             Blog Uploader
@@ -176,7 +176,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <Dialog>
             <DialogTrigger asChild>
               <Button
@@ -188,7 +188,7 @@ export default function Home() {
                 Setup Guide
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+            <DialogContent className="max-h-[90svh] overflow-y-auto p-4 sm:p-6 sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>GitHub Token Setup</DialogTitle>
                 <DialogDescription>
@@ -287,7 +287,7 @@ export default function Home() {
                     </code>{" "}
                     file or in your hosting provider&apos;s settings:
                   </p>
-                  <div className="relative rounded-md border border-zinc-200 bg-zinc-950 p-4">
+                  <div className="relative overflow-x-auto rounded-md border border-zinc-200 bg-zinc-950 p-4 pr-10">
                     <Button
                       variant="ghost"
                       size="icon-xs"
@@ -304,12 +304,10 @@ export default function Home() {
                         <Copy className="size-3" />
                       )}
                     </Button>
-                    <pre className="font-mono text-xs leading-relaxed text-zinc-300">
-                      {`GITHUB_TOKEN=ghp_your_token_here
-                        GITHUB_REPO_OWNER=your-username
-                        GITHUB_REPO_NAME=your-repo
-                        GITHUB_BRANCH=master`}
-                    </pre>
+                    <pre className="font-mono text-xs leading-relaxed text-zinc-300">{`GITHUB_TOKEN=ghp_your_token_here
+GITHUB_REPO_OWNER=your-username
+GITHUB_REPO_NAME=your-repo
+GITHUB_BRANCH=master`}</pre>
                   </div>
                 </div>
 
